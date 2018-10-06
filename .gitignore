@@ -7,3 +7,4 @@ target
 *.zip
 .DS_Store
 *.log
+.src.test
