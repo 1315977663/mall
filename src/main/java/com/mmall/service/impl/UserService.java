@@ -5,6 +5,7 @@ import com.mmall.common.ServerResponse;
 import com.mmall.dao.UserMapper;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
+import com.mmall.util.MD5Util;
 import net.sf.jsqlparser.schema.Server;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,9 @@ public class UserService implements IUserService {
         if(userMapper.checkUserName(username) == 0) {
             return ServerResponse.createByErrorMessage("用户名不存在");
         }
-
-        User user = userMapper.selectLogin(username, password);
+        // MD5加密
+        String md5Password = MD5Util.MD5EncodeUtf8(password);
+        User user = userMapper.selectLogin(username, md5Password);
 
         if(user == null) {
             return ServerResponse.createByErrorMessage("密码错误");
@@ -46,5 +48,45 @@ public class UserService implements IUserService {
             return ServerResponse.createByErrorMessage("用户还未登录，无法获取用户信息");
         }
         return ServerResponse.createBySuccess(user);
+    }
+
+    @Override
+    public ServerResponse register(User user) {
+        if (userMapper.checkUserName(user.getUsername()) != 0 ) {
+            return ServerResponse.createByErrorMessage("用户名已存在");
+        }
+        if (userMapper.checkEmail(user.getEmail()) != 0) {
+            return ServerResponse.createByErrorMessage("邮箱已被占用");
+        }
+        user.setRole(Const.Role.ROLE_CUSTOMER);
+        user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
+        int resultCount = userMapper.insert(user);
+        if (resultCount == 0) {
+            return  ServerResponse.createByErrorMessage("注册失败");
+        }
+        return ServerResponse.createBySuccessMessage("注册成功");
+    }
+
+    @Override
+    public ServerResponse checkValid(String str, String type) {
+        if (StringUtils.isNotBlank(type)) {
+            switch (type) {
+                case Const.EMAIL:
+                    if (userMapper.checkEmail(str) != 0) {
+                        return ServerResponse.createByErrorMessage("邮箱已被占用");
+                    }
+                    break;
+                case Const.USER_NAME:
+                    if (userMapper.checkUserName(str) != 0) {
+                        return ServerResponse.createByErrorMessage("用户名已存在");
+                    }
+                    break;
+                default:
+                    return ServerResponse.createByErrorMessage("type参数错误");
+            }
+        } else {
+            return ServerResponse.createByErrorMessage("type参数错误");
+        }
+        return ServerResponse.createBySuccessMessage("校验成功");
     }
 }

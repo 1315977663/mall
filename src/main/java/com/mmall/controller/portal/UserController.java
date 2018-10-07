@@ -25,6 +25,7 @@ public class UserController {
     @Autowired
     IUserService iUserService;
 
+    // 用户登录
     @RequestMapping(value = "/login.do", method = RequestMethod.POST)
     public ServerResponse<User> login(String username, String password, HttpSession session) {
 
@@ -36,8 +37,27 @@ public class UserController {
         return serverResponse;
     }
 
+    // 获取登录用户信息
     @RequestMapping(value = "/get_user_info.do", method = RequestMethod.GET)
     public ServerResponse<User> getUserInfo(HttpSession session) {
         return iUserService.getUserInfo(session);
+    }
+
+
+    // 退出登录.
+    @RequestMapping(value = "/logout.do", method = RequestMethod.GET)
+    public ServerResponse logout(HttpSession session) {
+        session.removeAttribute(Const.CURRENT_USER);
+        return ServerResponse.createBySuccess();
+    }
+
+    @RequestMapping(value = "/register.do", method = RequestMethod.POST)
+    public ServerResponse register(User user) {
+        return iUserService.register(user);
+    }
+
+    @RequestMapping(value = "/check_valid", method = RequestMethod.GET)
+    public ServerResponse checkValid(String str, String type) {
+        return iUserService.checkValid(str, type);
     }
 }

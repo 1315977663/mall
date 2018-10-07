@@ -157,6 +157,11 @@
     where username = #{userName, jdbcType=VARCHAR}
   </select>
 
+  <select id="checkEmail" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select count(1) from  mmall_user
+    where email = #{email, jdbcType=VARCHAR}
+  </select>
+
   <select id="selectLogin" parameterType="java.util.Map" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

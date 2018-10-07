@@ -8,4 +8,6 @@ import javax.servlet.http.HttpSession;
 public interface IUserService {
     ServerResponse<User> login(String username, String password);
     ServerResponse<User> getUserInfo(HttpSession session);
+    ServerResponse register(User user);
+    ServerResponse checkValid(String str, String type);
 }
