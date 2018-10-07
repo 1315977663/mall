@@ -151,4 +151,17 @@
       now()
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="checkUserName" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select count(1) from mmall_user
+    where username = #{userName, jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectLogin" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from mmall_user
+    where username = #{username, jdbcType=VARCHAR} and password = #{password, jdbcType=VARCHAR}
+  </select>
+
 </mapper>
