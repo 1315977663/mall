@@ -2,6 +2,7 @@ package com.mmall.service.impl;
 
 import com.mmall.common.Const;
 import com.mmall.common.ServerResponse;
+import com.mmall.common.TokenCache;
 import com.mmall.dao.UserMapper;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
+import java.util.UUID;
 
 /**
  * @program: mmall
@@ -67,6 +69,7 @@ public class UserService implements IUserService {
         return ServerResponse.createBySuccessMessage("注册成功");
     }
 
+    // 校验用户名，邮箱不存在。不存在返回成功
     @Override
     public ServerResponse checkValid(String str, String type) {
         if (StringUtils.isNotBlank(type)) {
@@ -88,5 +91,28 @@ public class UserService implements IUserService {
             return ServerResponse.createByErrorMessage("type参数错误");
         }
         return ServerResponse.createBySuccessMessage("校验成功");
+    }
+
+    @Override
+    public ServerResponse<String> getQuestion(String username) {
+        ServerResponse checkResponse = this.checkValid(username, Const.USER_NAME);
+        if (checkResponse.isSuccess()) {
+            return  ServerResponse.createByErrorMessage("用户名不存在");
+        }
+        String question = userMapper.selectQuestionByName(username);
+        if (StringUtils.isNotBlank(question)) {
+            return ServerResponse.createBySuccess(question);
+        }
+        return ServerResponse.createByErrorMessage("该用户未设置找回密码问题");
+    }
+
+    @Override
+    public ServerResponse<String> checkAnswer(String username, String question, String answer) {
+        if (userMapper.checkUserAnswer(username, question, answer) > 0) {
+            String token = UUID.randomUUID().toString();
+            TokenCache.setKey(TokenCache.TOKEN_KEY_PREFIX + username, token);
+            return ServerResponse.createBySuccess(token);
+        }
+        return ServerResponse.createByErrorMessage("问题答案错误");
     }
 }

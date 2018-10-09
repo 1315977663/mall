@@ -169,4 +169,20 @@
     where username = #{username, jdbcType=VARCHAR} and password = #{password, jdbcType=VARCHAR}
   </select>
 
+  <select id="selectQuestionByName" parameterType="java.lang.String" resultType="java.lang.String">
+    select
+    question
+    from mmall_user
+    where username = #{username, jdbcType=VARCHAR}
+  </select>
+
+  <select id="checkUserAnswer" parameterType="java.util.Map" resultType="java.lang.Integer">
+    select
+    count(1)
+    from  mmall_user
+    where username = #{username, jdbcType=VARCHAR}
+    and question = #{question, jdbcType=VARCHAR}
+    and answer = #{answer, jdbcType=VARCHAR}
+  </select>
+
 </mapper>

@@ -60,4 +60,14 @@ public class UserController {
     public ServerResponse checkValid(String str, String type) {
         return iUserService.checkValid(str, type);
     }
+
+    @RequestMapping(value = "/forget_get_question.do", method = RequestMethod.GET)
+    public ServerResponse<String> forgetGetQuestion(String username) {
+        return iUserService.getQuestion(username);
+    }
+
+    @RequestMapping(value = "forget_check_answer.do", method = RequestMethod.POST)
+    public ServerResponse<String> forgetCheckAnswer(String username, String question, String answer) {
+        return iUserService.checkAnswer(username, question, answer);
+    }
 }
