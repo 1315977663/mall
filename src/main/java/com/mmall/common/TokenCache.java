@@ -20,7 +20,7 @@ public class TokenCache {
             .build(new CacheLoader<String, String>() {
                 @Override
                 public String load(String s) throws Exception {
-                    return null;
+                    return "null";
                 }
             });
 

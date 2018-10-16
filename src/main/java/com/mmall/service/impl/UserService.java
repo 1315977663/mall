@@ -115,4 +115,24 @@ public class UserService implements IUserService {
         }
         return ServerResponse.createByErrorMessage("问题答案错误");
     }
+
+    @Override
+    public ServerResponse userForgetResetPassword(String username, String passwordNew, String token) {
+
+        if(StringUtils.isBlank(token)) {
+            return ServerResponse.createByErrorMessage("token是必须参数");
+        }
+        String tokenCache = TokenCache.getKey(TokenCache.TOKEN_KEY_PREFIX + username);
+        if (StringUtils.equals(token, tokenCache)) {
+            String md5Password = MD5Util.MD5EncodeUtf8(passwordNew);
+            int result = userMapper.updatePassword(username, md5Password);
+            if (result > 0) {
+                return ServerResponse.createBySuccessMessage("密码修改成功");
+            }
+        } else {
+            return ServerResponse.createByErrorMessage("token错误");
+        }
+
+        return ServerResponse.createByErrorMessage("修改失败");
+    }
 }

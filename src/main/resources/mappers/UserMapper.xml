@@ -133,7 +133,7 @@
         create_time = #{createTime,jdbcType=TIMESTAMP},
       </if>
       <if test="updateTime != null">
-       now(),
+        updateTime = now(),
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
@@ -148,7 +148,7 @@
       answer = #{answer,jdbcType=VARCHAR},
       role = #{role,jdbcType=INTEGER},
       create_time = #{createTime,jdbcType=TIMESTAMP},
-      now()
+      update_time = now()
     where id = #{id,jdbcType=INTEGER}
   </update>
 
@@ -184,5 +184,12 @@
     and question = #{question, jdbcType=VARCHAR}
     and answer = #{answer, jdbcType=VARCHAR}
   </select>
+
+  <update id="updatePassword" parameterType="java.util.Map">
+    update
+    mmall_user
+    set password = #{password, jdbcType=VARCHAR}, update_time = now()
+    where username = #{username, jdbcType=VARCHAR}
+  </update>
 
 </mapper>
