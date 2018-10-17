@@ -135,4 +135,19 @@ public class UserService implements IUserService {
 
         return ServerResponse.createByErrorMessage("修改失败");
     }
+
+    @Override
+    public ServerResponse userResetPassword(String username, String password, String passwordNew) {
+        String md5Password = MD5Util.MD5EncodeUtf8(password);
+        User user = userMapper.selectLogin(username, md5Password);
+        if(user != null) {
+          int result = userMapper.updatePassword(username, MD5Util.MD5EncodeUtf8(passwordNew));
+          if (result > 0) {
+              return ServerResponse.createBySuccessMessage("密码修改成功");
+          }
+        } else {
+            return ServerResponse.createByErrorMessage("旧密码错误");
+        }
+        return ServerResponse.createByErrorMessage("修改失败，请重试");
+    }
 }
