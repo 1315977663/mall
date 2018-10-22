@@ -13,7 +13,7 @@ public class Const {
     public static final String USER_NAME = "username";
 
     public interface Role{
-        int ROLE_CUSTOMER = 0; // 普通用用户
-        int ROLE_ADMIN = 1; // 管理元用户
+        int ROLE_CUSTOMER = 1; // 普通用用户
+        int ROLE_ADMIN = 0; // 管理元用户
     }
 }

@@ -132,9 +132,7 @@
       <if test="createTime != null">
         create_time = #{createTime,jdbcType=TIMESTAMP},
       </if>
-      <if test="updateTime != null">
-        updateTime = now(),
-      </if>
+        update_time = now()
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -191,5 +189,23 @@
     set password = #{password, jdbcType=VARCHAR}, update_time = now()
     where username = #{username, jdbcType=VARCHAR}
   </update>
+
+  <select id="checkEmailById" parameterType="java.util.Map" resultType="java.lang.Integer">
+    select
+    count(1)
+    from mmall_user
+    where
+    email = #{email, jdbcType=VARCHAR}
+    and
+    id != #{userId, jdbcType=INTEGER}
+  </select>
+
+  <select id="getUserList" resultMap="BaseResultMap">
+    select
+    *
+    from mmall_user
+    where
+    role = 1
+  </select>
 
 </mapper>

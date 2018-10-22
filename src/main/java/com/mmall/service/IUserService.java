@@ -1,5 +1,6 @@
 package com.mmall.service;
 
+import com.mmall.common.PageBean;
 import com.mmall.common.ServerResponse;
 import com.mmall.pojo.User;
 
@@ -18,4 +19,10 @@ public interface IUserService {
     ServerResponse userForgetResetPassword(String username, String passwordNew, String token);
 
     ServerResponse userResetPassword(String username, String password, String passwordNew);
+
+    ServerResponse<User> updateInformation(User user, User currentUser);
+
+    ServerResponse<User> getInformation(User user);
+
+    ServerResponse<PageBean<User>> getUserList(int pageNum, int pageSize);
 }

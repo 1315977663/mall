@@ -1,6 +1,8 @@
 package com.mmall.service.impl;
 
+import com.github.pagehelper.PageHelper;
 import com.mmall.common.Const;
+import com.mmall.common.PageBean;
 import com.mmall.common.ServerResponse;
 import com.mmall.common.TokenCache;
 import com.mmall.dao.UserMapper;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -149,5 +152,45 @@ public class UserService implements IUserService {
             return ServerResponse.createByErrorMessage("旧密码错误");
         }
         return ServerResponse.createByErrorMessage("修改失败，请重试");
+    }
+
+    @Override
+    public ServerResponse<User> updateInformation(User user, User currentUser){
+
+        // 用户名不允许更改，需要判断email的唯一性
+        user.setPassword(null);
+        user.setId(currentUser.getId());
+        user.setUsername(currentUser.getUsername());
+
+        int result = userMapper.checkEmailById(user.getEmail(), user.getId());
+
+        if (result > 0) {
+            return ServerResponse.createByErrorMessage("邮箱已经被占用");
+        }
+
+        int updateResult = userMapper.updateByPrimaryKeySelective(user);
+
+        if(updateResult > 0) {
+            return ServerResponse.createBySuccess(user, "更新个人信息成功");
+        }
+
+        return ServerResponse.createByErrorMessage("更新失败");
+    }
+
+    @Override
+    public ServerResponse<User> getInformation(User user){
+        User userInfo = userMapper.selectByPrimaryKey(user.getId());
+        if(userInfo == null){
+            return ServerResponse.createByErrorMessage("用户信息不存在");
+        }
+        return ServerResponse.createBySuccess(userInfo, "用户信息获取成功");
+    }
+
+    @Override
+    public ServerResponse<PageBean<User>> getUserList(int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<User> userList = userMapper.getUserList();
+        PageBean<User> pageBean = new PageBean<>(userList);
+        return ServerResponse.createBySuccess(pageBean);
     }
 }
