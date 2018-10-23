@@ -92,7 +92,7 @@
       <if test="createTime != null">
         create_time = #{createTime,jdbcType=TIMESTAMP},
       </if>
-        update_time = now(),
+        update_time = now()
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -101,7 +101,7 @@
     select
     <include refid="Base_Column_List"/>
     from mmall_category
-    where id = #{categoryId, jdbcType=INTEGER}
+    where parent_id = #{categoryId, jdbcType=INTEGER}
   </select>
 
 </mapper>
