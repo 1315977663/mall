@@ -67,6 +67,10 @@ public class CategoryManageController {
     @RequestMapping(value = "/set_category_name", method = RequestMethod.PUT)
     public ServerResponse setCategoryName(Integer categoryId, String categoryName, HttpServletRequest servletRequest) {
 
+//        System.out.println(servletRequest.getMethod());
+//        System.out.println(servletRequest.getContentType());
+//        System.out.println(MediaType.parseMediaType(servletRequest.getContentType()));
+
         User currentUser = (User) this.session.getAttribute(Const.CURRENT_USER);
 
         if(currentUser == null) {
