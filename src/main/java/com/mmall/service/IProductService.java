@@ -12,4 +12,7 @@ import com.mmall.pojo.Product;
  **/
 public interface IProductService {
     ServerResponse<PageBean<Product>> getList(int pageNum, int pageSize);
+
+    ServerResponse<Object> search(int productId, String productName,
+                                  int pageNum, int pageSize);
 }

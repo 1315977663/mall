@@ -33,35 +33,19 @@ public class ProductManageController {
     @Autowired
     HttpSession session;
 
-    @Auth(role = Role.CUSTOMER)
+    @Auth(role = Role.ADMIN)
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public ServerResponse<PageBean<Product>> list(@RequestParam(defaultValue = "1") int pageNum, @RequestParam(defaultValue = "10") int pageSize){
-
-        User currentUser = (User) this.session.getAttribute(Const.CURRENT_USER);
-
-        if(currentUser == null) {
-            return ServerResponse.createByErrorMessage("没有登录");
-        }
-        if(currentUser.getRole() != Const.Role.ROLE_ADMIN) {
-            return  ServerResponse.createByErrorMessage("没有权限");
-        }
-
         return iProductService.getList(pageNum, pageSize);
     }
 
+    @Auth(role = Role.CUSTOMER)
     @RequestMapping(value = "/search", method = RequestMethod.GET)
-    public ServerResponse<PageBean<Product>> search() {
-
-        User currentUser = (User) this.session.getAttribute(Const.CURRENT_USER);
-
-        if(currentUser == null) {
-            return ServerResponse.createByErrorMessage("没有登录");
-        }
-        if(currentUser.getRole() != Const.Role.ROLE_ADMIN) {
-            return  ServerResponse.createByErrorMessage("没有权限");
-        }
-
-        return null;
+    public ServerResponse<Object> search(@RequestParam(defaultValue = "-1") int productId,
+                                                    @RequestParam(defaultValue = "") String productName,
+                                                    @RequestParam(defaultValue = "1") int pageNum,
+                                                    @RequestParam(defaultValue = "10") int pageSize){
+        return iProductService.search(productId, productName, pageNum, pageSize);
     }
 
 }

@@ -1,11 +1,13 @@
 package com.mmall.service.impl;
 
 import com.github.pagehelper.PageHelper;
+import com.google.common.collect.Lists;
 import com.mmall.common.PageBean;
 import com.mmall.common.ServerResponse;
 import com.mmall.dao.ProductMapper;
 import com.mmall.pojo.Product;
 import com.mmall.service.IProductService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,25 @@ public class ProductService implements IProductService {
         List<Product> productList = productMapper.getAllList();
         PageBean<Product> pageBean = new PageBean<>(productList);
         return ServerResponse.createBySuccess(pageBean);
+    }
+
+    @Override
+    public ServerResponse<Object> search(int productId, String productName,
+                                                    int pageNum, int pageSize){
+
+        if(productId != -1){
+            Product product = productMapper.selectByPrimaryKey(productId);
+            return ServerResponse.createBySuccess(product);
+        }
+         if(!StringUtils.isBlank(productName)){
+            PageHelper.startPage(pageNum, pageSize);
+            List<Product> products = productMapper.selectByProductName(productName);
+            PageBean<Product> pageBean = new PageBean<>(products);
+            return ServerResponse.createBySuccess(pageBean);
+         }
+
+
+        return ServerResponse.createByErrorMessage("参数错误");
     }
 
 }
