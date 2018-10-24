@@ -6,10 +6,13 @@ import com.mmall.pojo.Category;
 import com.mmall.pojo.User;
 import com.mmall.service.ICategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
@@ -29,7 +32,7 @@ public class CategoryManageController {
     @Autowired
     HttpSession session;
 
-    @RequestMapping("/get_category")
+    @RequestMapping(value = "/get_category", method = RequestMethod.GET)
     public ServerResponse<List<Category>> getCategory(@RequestParam(defaultValue = "0")int categoryId, HttpSession session) {
 
         User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
@@ -44,8 +47,10 @@ public class CategoryManageController {
         return iCategoryService.getCategory(categoryId);
     }
 
-    @RequestMapping("/add_category")
-    public ServerResponse addCategory(@RequestParam(defaultValue = "0")int parentId, String categoryName) {
+    @RequestMapping(value = "/add_category", method = RequestMethod.POST)
+    public ServerResponse addCategory(@RequestParam(defaultValue = "0")int parentId, String categoryName, HttpServletRequest servletRequest) {
+
+        System.out.println(servletRequest.getMethod());
 
         User currentUser = (User) this.session.getAttribute(Const.CURRENT_USER);
 
@@ -59,8 +64,8 @@ public class CategoryManageController {
         return iCategoryService.addCategory(parentId, categoryName);
     }
 
-    @RequestMapping("/set_category_name")
-    public ServerResponse setCategoryName(int categoryId, String categoryName) {
+    @RequestMapping(value = "/set_category_name", method = RequestMethod.PUT)
+    public ServerResponse setCategoryName(Integer categoryId, String categoryName, HttpServletRequest servletRequest) {
 
         User currentUser = (User) this.session.getAttribute(Const.CURRENT_USER);
 
@@ -74,7 +79,7 @@ public class CategoryManageController {
         return iCategoryService.setCategoryName(categoryId, categoryName);
     }
 
-    @RequestMapping("get_deep_category")
+    @RequestMapping(value = "get_deep_category", method = RequestMethod.GET)
     public ServerResponse<List<Integer>> getDeepCategory(@RequestParam(defaultValue = "0") int categoryId){
 
         User currentUser = (User) this.session.getAttribute(Const.CURRENT_USER);

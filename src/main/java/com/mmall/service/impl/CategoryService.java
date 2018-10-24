@@ -65,6 +65,7 @@ public class CategoryService implements ICategoryService {
             return ServerResponse.createByErrorMessage("修改类型名称不能为空");
         }
         Category category = new Category();
+        category.setId(categoryId);
         category.setName(categoryName);
         int result = categoryMapper.updateByPrimaryKeySelective(category);
         if (result > 0){
