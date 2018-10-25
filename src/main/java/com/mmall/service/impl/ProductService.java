@@ -1,7 +1,6 @@
 package com.mmall.service.impl;
 
 import com.github.pagehelper.PageHelper;
-import com.google.common.collect.Lists;
 import com.mmall.common.PageBean;
 import com.mmall.common.ServerResponse;
 import com.mmall.dao.ProductMapper;
@@ -43,7 +42,7 @@ public class ProductService implements IProductService {
         }
          if(!StringUtils.isBlank(productName)){
             PageHelper.startPage(pageNum, pageSize);
-            List<Product> products = productMapper.selectByProductName(productName);
+            List<Product> products = productMapper.selectByLikeProductName("%" + productName + "%");
             PageBean<Product> pageBean = new PageBean<>(products);
             return ServerResponse.createBySuccess(pageBean);
          }

@@ -19,5 +19,5 @@ public interface ProductMapper {
 
     List<Product> getAllList();
 
-    List<Product> selectByProductName(String productName);
+    List<Product> selectByLikeProductName(String productName);
 }

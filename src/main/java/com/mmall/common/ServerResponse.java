@@ -14,6 +14,9 @@ import java.io.Serializable;
  **/
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL) // 为空的省略key
 public class ServerResponse<T> implements Serializable {
+
+    private static final long serialVersionUID = 7083883017995904783L;
+
     private int status;
     private String message;
     private T data;

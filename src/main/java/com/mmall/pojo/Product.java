@@ -1,9 +1,16 @@
 package com.mmall.pojo;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class Product {
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
+public class Product implements Serializable {
+
+    private static final long serialVersionUID = 3877039105437357692L;
+
     private Integer id;
 
     private Integer categoryId;
@@ -41,6 +48,16 @@ public class Product {
         this.status = status;
         this.createTime = createTime;
         this.updateTime = updateTime;
+    }
+
+    public Product(Integer id, Integer categoryId, String name, String subtitle, String mainImage, BigDecimal price, Integer status) {
+        this.id = id;
+        this.categoryId = categoryId;
+        this.name = name;
+        this.subtitle = subtitle;
+        this.mainImage = mainImage;
+        this.price = price;
+        this.status = status;
     }
 
     public Product() {

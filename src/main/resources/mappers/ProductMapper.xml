@@ -17,10 +17,28 @@
       <arg column="update_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
     </constructor>
   </resultMap>
+
+  <resultMap id="BaseResultSimpleMap" type="com.mmall.pojo.Product">
+    <constructor>
+      <idArg column="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="category_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="subtitle" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="main_image" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="price" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <arg column="status" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    </constructor>
+  </resultMap>
+
   <sql id="Base_Column_List">
     id, category_id, name, subtitle, main_image, sub_images, detail, price, stock, status, 
     create_time, update_time
   </sql>
+
+  <sql id="Base_Column_Simple_List">
+    id, category_id, name, subtitle, main_image, price, status
+  </sql>
+
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />
@@ -169,18 +187,18 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
-  <select id="getAllList" resultMap="BaseResultMap">
+  <select id="getAllList" resultMap="BaseResultSimpleMap">
     select
-    <include refid="Base_Column_List"/>
+    <include refid="Base_Column_Simple_List"/>
     from mmall_product
     where 1
   </select>
 
-  <select id="selectByProductName" resultMap="BaseResultMap" parameterType="java.lang.String">
+  <select id="selectByLikeProductName" resultMap="BaseResultSimpleMap" parameterType="java.lang.String">
     select
-    <include refid="Base_Column_List"/>
+    <include refid="Base_Column_Simple_List"/>
     from mmall_product
-    where name = #{productName, jdbcType = VARCHAR}
+    where name like #{productName, jdbcType = VARCHAR}
   </select>
 
 </mapper>
