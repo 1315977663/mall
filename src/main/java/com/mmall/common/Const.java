@@ -16,4 +16,11 @@ public class Const {
         int ROLE_CUSTOMER = 1; // 普通用用户
         int ROLE_ADMIN = 0; // 管理元用户
     }
+
+    public interface ProductStatus{
+        int SELLING = 1; // 售卖中
+        int SELLING_END = 2; // 下架
+        int DELETE = 3; // 删除
+    }
+
 }

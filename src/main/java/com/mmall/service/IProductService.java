@@ -15,4 +15,10 @@ public interface IProductService {
 
     ServerResponse<Object> search(int productId, String productName,
                                   int pageNum, int pageSize);
+
+    ServerResponse<Product> getDetail(int productId);
+
+    ServerResponse setSaleStatus(int productId, int status);
+
+    ServerResponse save(Product product);
 }

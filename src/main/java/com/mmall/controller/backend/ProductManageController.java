@@ -44,4 +44,27 @@ public class ProductManageController {
         return iProductService.search(productId, productName, pageNum, pageSize);
     }
 
+    @RequestMapping(value = "/detail", method = RequestMethod.GET)
+    public ServerResponse<Product> detail(@RequestParam(defaultValue = "-1") int productId){
+        return iProductService.getDetail(productId);
+    }
+
+    /**
+     *  默认上架状态
+     * @param productId 产品id
+     * @param status 1->上架 2->下架 3->删除
+     * @return
+     */
+    @RequestMapping(value = "/set_sale_status", method = RequestMethod.PUT)
+    public ServerResponse setSaleStatus(@RequestParam(defaultValue = "-1") int productId,
+                                        @RequestParam(defaultValue = "1") int status){
+        return iProductService.setSaleStatus(productId, status);
+    }
+
+
+    @RequestMapping(value = "/save.do", method = RequestMethod.POST)
+    public ServerResponse save(Product product){
+        return iProductService.save(product);
+    }
+
 }

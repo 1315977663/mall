@@ -1,6 +1,7 @@
 package com.mmall.service.impl;
 
 import com.github.pagehelper.PageHelper;
+import com.mmall.common.Const;
 import com.mmall.common.PageBean;
 import com.mmall.common.ServerResponse;
 import com.mmall.dao.ProductMapper;
@@ -49,6 +50,56 @@ public class ProductService implements IProductService {
 
 
         return ServerResponse.createByErrorMessage("参数错误");
+    }
+
+    @Override
+    public ServerResponse<Product> getDetail(int productId){
+        if(productId < 0){
+            return ServerResponse.createByErrorMessage("参数错误");
+        }
+        Product product = productMapper.selectByPrimaryKey(productId);
+        return ServerResponse.createBySuccess(product);
+    }
+
+    @Override
+    public ServerResponse setSaleStatus(int productId, int status){
+
+        if(productId < 0){
+            return ServerResponse.createByErrorMessage("id参数错误");
+        }
+
+        if(status < Const.ProductStatus.SELLING || status > Const.ProductStatus.DELETE){
+            return ServerResponse.createByErrorMessage("status参数错误");
+        }
+
+        Product product = new Product();
+        product.setId(productId);
+        product.setStatus(status);
+
+        int result = productMapper.updateByPrimaryKeySelective(product);
+        if(result > 0){
+            return ServerResponse.createBySuccessMessage("修改产品状态成功");
+        }
+
+        return ServerResponse.createByErrorMessage("修改产品状态失败");
+    }
+
+    @Override
+    public ServerResponse save(Product product){
+        if(product.getId() == null){
+            // 执行新增操作
+            int result = productMapper.insertSelective(product);
+            if(result > 0){
+                return ServerResponse.createBySuccessMessage("新增产品成功");
+            }
+            return ServerResponse.createByErrorMessage("新增产品失败");
+        }
+        // 执行更新操作
+        int result = productMapper.updateByPrimaryKeySelective(product);
+        if(result > 0){
+            return ServerResponse.createBySuccessMessage("更新产品信息成功");
+        }
+        return ServerResponse.createByErrorMessage("更新产品失败");
     }
 
 }
