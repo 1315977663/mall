@@ -198,4 +198,11 @@
       now()
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="selectCount" resultType="java.lang.Integer">
+    select
+    count(1)
+    from mmall_order
+  </select>
+
 </mapper>

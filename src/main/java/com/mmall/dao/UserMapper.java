@@ -33,4 +33,6 @@ public interface UserMapper {
     int checkEmailById(@Param("email") String email, @Param("userId") int userId);
 
     List<User> getUserList();
+
+    int selectUserCount();
 }

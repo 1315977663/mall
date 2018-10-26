@@ -20,4 +20,6 @@ public interface ProductMapper {
     List<Product> getAllList();
 
     List<Product> selectByLikeProductName(String productName);
+
+    int selectCount();
 }

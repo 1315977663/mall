@@ -207,5 +207,11 @@
     where
     role = 1
   </select>
+  
+  <select id="selectUserCount" resultType="java.lang.Integer">
+    select
+    count(1)
+    from mmall_user
+  </select>
 
 </mapper>
