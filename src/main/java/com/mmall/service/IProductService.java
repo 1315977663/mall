@@ -3,6 +3,7 @@ package com.mmall.service;
 import com.mmall.common.PageBean;
 import com.mmall.common.ServerResponse;
 import com.mmall.pojo.Product;
+import com.mmall.vo.ProductDetailVO;
 
 /**
  * @program: mmall
@@ -16,7 +17,7 @@ public interface IProductService {
     ServerResponse<Object> search(int productId, String productName,
                                   int pageNum, int pageSize);
 
-    ServerResponse<Product> getDetail(int productId);
+    ServerResponse<ProductDetailVO> getDetail(int productId);
 
     ServerResponse setSaleStatus(int productId, int status);
 

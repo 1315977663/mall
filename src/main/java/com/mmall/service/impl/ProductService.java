@@ -4,9 +4,14 @@ import com.github.pagehelper.PageHelper;
 import com.mmall.common.Const;
 import com.mmall.common.PageBean;
 import com.mmall.common.ServerResponse;
+import com.mmall.dao.CategoryMapper;
 import com.mmall.dao.ProductMapper;
+import com.mmall.pojo.Category;
 import com.mmall.pojo.Product;
 import com.mmall.service.IProductService;
+import com.mmall.util.DateFormatUtil;
+import com.mmall.util.PropertiesUtil;
+import com.mmall.vo.ProductDetailVO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +29,9 @@ public class ProductService implements IProductService {
 
     @Autowired
     ProductMapper productMapper;
+
+    @Autowired
+    CategoryMapper categoryMapper;
 
     @Override
     public ServerResponse<PageBean<Product>> getList(int pageNum, int pageSize){
@@ -53,12 +61,13 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public ServerResponse<Product> getDetail(int productId){
+    public ServerResponse<ProductDetailVO> getDetail(int productId){
         if(productId < 0){
             return ServerResponse.createByErrorMessage("参数错误");
         }
         Product product = productMapper.selectByPrimaryKey(productId);
-        return ServerResponse.createBySuccess(product);
+
+        return ServerResponse.createBySuccess(this.product2productDetailVO(product));
     }
 
     @Override
@@ -100,6 +109,33 @@ public class ProductService implements IProductService {
             return ServerResponse.createBySuccessMessage("更新产品信息成功");
         }
         return ServerResponse.createByErrorMessage("更新产品失败");
+    }
+
+    private ProductDetailVO product2productDetailVO(Product product) {
+        if (product == null){
+            return null;
+        }
+        ProductDetailVO productDetailVO = new ProductDetailVO();
+        productDetailVO.setId(product.getId());
+        productDetailVO.setCategoryId(product.getCategoryId());
+        Category category = categoryMapper.selectByPrimaryKey(product.getCategoryId());
+        if(category == null){
+            productDetailVO.setParentCategoryId(0);
+        } else {
+            productDetailVO.setParentCategoryId(category.getParentId());
+        }
+        productDetailVO.setName(product.getName());
+        productDetailVO.setSubtitle(product.getSubtitle());
+        productDetailVO.setImageHost(PropertiesUtil.getValue("imageHost", "www.baidu2.com"));
+        productDetailVO.setMainImage(product.getMainImage());
+        productDetailVO.setSubImages(product.getSubImages());
+        productDetailVO.setDetail(product.getDetail());
+        productDetailVO.setPrice(product.getPrice());
+        productDetailVO.setStatus(product.getStatus());
+        productDetailVO.setStock(product.getStock());
+        productDetailVO.setCreateTime(DateFormatUtil.dateToStr(product.getCreateTime()));
+        productDetailVO.setUpdateTime(DateFormatUtil.dateToStr(product.getUpdateTime()));
+        return productDetailVO;
     }
 
 }

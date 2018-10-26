@@ -6,6 +6,7 @@ import com.mmall.common.ServerResponse;
 import com.mmall.pojo.Product;
 import com.mmall.security.Auth;
 import com.mmall.service.IProductService;
+import com.mmall.vo.ProductDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -45,7 +46,7 @@ public class ProductManageController {
     }
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public ServerResponse<Product> detail(@RequestParam(defaultValue = "-1") int productId){
+    public ServerResponse<ProductDetailVO> detail(@RequestParam(defaultValue = "-1") int productId){
         return iProductService.getDetail(productId);
     }
 
