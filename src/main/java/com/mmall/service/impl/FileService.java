@@ -1,7 +1,9 @@
 package com.mmall.service.impl;
 
+import com.google.common.collect.Lists;
 import com.mmall.common.ServerResponse;
 import com.mmall.service.IFileService;
+import com.mmall.util.FTPUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -54,18 +56,21 @@ public class FileService implements IFileService {
             file.transferTo(targetFile);
             // 文件已经传输到了服务器上
 
-
+            boolean ftpSuccess = FTPUtil.uploadFile(Lists.newArrayList(targetFile));
             //todo 传到ftp服务上
 
-            // targetFile.delete();
+            targetFile.delete();
+
+            if(ftpSuccess){
+                return ServerResponse.createBySuccess(targetFile.getName(), "文件上传成功");
+            } else {
+                return ServerResponse.createByErrorMessage("文件上传失败");
+            }
             //删除服务器上文件
         } catch (IOException e) {
             logger.error("文件上传失败", e.getMessage());
             return ServerResponse.createByErrorMessage("文件上传失败");
         }
-
-
-        return ServerResponse.createBySuccess(targetFile.getName(), "文件上传成功");
     }
 
 }
