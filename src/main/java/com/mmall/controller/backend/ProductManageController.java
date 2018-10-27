@@ -5,6 +5,7 @@ import com.mmall.common.Role;
 import com.mmall.common.ServerResponse;
 import com.mmall.pojo.Product;
 import com.mmall.security.Auth;
+import com.mmall.service.IFileService;
 import com.mmall.service.IProductService;
 import com.mmall.vo.ProductDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
 
@@ -21,13 +23,15 @@ import javax.servlet.http.HttpSession;
  * @author: fbl
  * @create: 2018-10-24 15:25
  **/
-@Auth(role = Role.ADMIN)
 @RestController
 @RequestMapping("/manage/product")
 public class ProductManageController {
 
     @Autowired
     IProductService iProductService;
+
+    @Autowired
+    IFileService iFileService;
 
     @Autowired
     HttpSession session;
@@ -66,6 +70,11 @@ public class ProductManageController {
     @RequestMapping(value = "/save.do", method = RequestMethod.POST)
     public ServerResponse save(Product product){
         return iProductService.save(product);
+    }
+
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    public ServerResponse<String> upload(@RequestParam(value = "file") MultipartFile multipartFile, String submit){
+        return iFileService.upload(multipartFile, submit);
     }
 
 }
