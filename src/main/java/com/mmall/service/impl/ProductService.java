@@ -1,6 +1,7 @@
 package com.mmall.service.impl;
 
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.mmall.common.Const;
 import com.mmall.common.PageBean;
 import com.mmall.common.ServerResponse;
@@ -8,6 +9,7 @@ import com.mmall.dao.CategoryMapper;
 import com.mmall.dao.ProductMapper;
 import com.mmall.pojo.Category;
 import com.mmall.pojo.Product;
+import com.mmall.service.ICategoryService;
 import com.mmall.service.IProductService;
 import com.mmall.util.DateFormatUtil;
 import com.mmall.util.PropertiesUtil;
@@ -16,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +35,9 @@ public class ProductService implements IProductService {
 
     @Autowired
     CategoryMapper categoryMapper;
+
+    @Autowired
+    ICategoryService iCategoryService;
 
     @Override
     public ServerResponse<PageBean<Product>> getList(int pageNum, int pageSize){
@@ -109,6 +115,24 @@ public class ProductService implements IProductService {
             return ServerResponse.createBySuccessMessage("更新产品信息成功");
         }
         return ServerResponse.createByErrorMessage("更新产品失败");
+    }
+
+    @Override
+    public ServerResponse<PageInfo<Product>> getPortalList(int categoryId, String keyword, int pageNum, int pageSize, String orderBy){
+        List<Integer> categoryIds = iCategoryService.getDeepCategory(categoryId).getData(); // 存放品类 Id
+        PageHelper.startPage(pageNum, pageSize);
+        if(Const.ProductListOrderBy.orderByList.contains(orderBy)){
+            String[] orderBy1 = orderBy.split("_");
+            PageHelper.orderBy(orderBy1[0] + " "  + orderBy1[1]);
+        }
+        if(StringUtils.isBlank(keyword)){
+            keyword = null;
+        } else {
+            keyword = "%" + keyword + "%";
+        }
+        List<Product> products = productMapper.getList(categoryIds,keyword);
+        PageInfo<Product> pageInfo = new PageInfo<>(products);
+        return ServerResponse.createBySuccess(pageInfo);
     }
 
     private ProductDetailVO product2productDetailVO(Product product) {

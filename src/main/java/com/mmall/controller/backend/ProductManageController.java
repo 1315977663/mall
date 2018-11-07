@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
+import java.util.*;
 
 /**
  * @program: mmall
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpSession;
  * @author: fbl
  * @create: 2018-10-24 15:25
  **/
+@Auth(role = Role.ADMIN)
 @RestController
 @RequestMapping("/manage/product")
 public class ProductManageController {
@@ -76,5 +78,4 @@ public class ProductManageController {
     public ServerResponse<String> upload(@RequestParam(value = "file") MultipartFile multipartFile, String submit){
         return iFileService.upload(multipartFile, submit);
     }
-
 }

@@ -1,5 +1,9 @@
 package com.mmall.common;
 
+import com.google.common.collect.Sets;
+
+import java.util.Set;
+
 /**
  * @program: mmall
  * @description:
@@ -15,6 +19,10 @@ public class Const {
     public interface Role{
         int ROLE_CUSTOMER = 1; // 普通用用户
         int ROLE_ADMIN = 0; // 管理元用户
+    }
+
+    public interface ProductListOrderBy{
+        Set<String> orderByList = Sets.newHashSet("price_desc", "price_asc");
     }
 
     public interface ProductStatus{

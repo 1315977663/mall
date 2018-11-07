@@ -1,5 +1,6 @@
 package com.mmall.service;
 
+import com.github.pagehelper.PageInfo;
 import com.mmall.common.PageBean;
 import com.mmall.common.ServerResponse;
 import com.mmall.pojo.Product;
@@ -22,4 +23,6 @@ public interface IProductService {
     ServerResponse setSaleStatus(int productId, int status);
 
     ServerResponse save(Product product);
+
+    ServerResponse<PageInfo<Product>> getPortalList(int categoryId, String keyword, int pageNum, int pageSize, String orderBy);
 }

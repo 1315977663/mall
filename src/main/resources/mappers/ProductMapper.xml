@@ -208,4 +208,20 @@
     from mmall_product
   </select>
 
+  <select id="getList" parameterType="java.util.Map" resultMap="BaseResultSimpleMap">
+    select
+    <include refid="Base_Column_Simple_List"/>
+    from mmall_product
+    where 1
+    <if test="keyword != null">
+      and name like #{keyword,jdbcType=VARCHAR}
+    </if>
+    <if test="categoryIds != null">
+      and category_id IN
+      <foreach index="index" item="item" open="(" close=")" separator="," collection="categoryIds">
+        #{item, jdbcType = INTEGER}
+      </foreach>
+    </if>
+  </select>
+
 </mapper>
