@@ -31,4 +31,11 @@ public class Const {
         int DELETE = 3; // 删除
     }
 
+    public interface CartStatus{
+        int UN_CHECK = 0; // 未选中
+        int CHECKED = 1; // 选中
+        String LIMIT_NUM_SUCCESS = "LIMIT_NUM_SUCCESS";
+        String LIMIT_NUM_FAIL = "LIMIT_NUM_FAIL";
+    }
+
 }
