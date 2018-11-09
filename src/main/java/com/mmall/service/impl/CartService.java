@@ -1,5 +1,6 @@
 package com.mmall.service.impl;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.mmall.common.Const;
 import com.mmall.common.ServerResponse;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,6 +56,34 @@ public class CartService implements ICartService {
         return this.list(userId);
     }
 
+    @Override
+    public ServerResponse<CartVo> update(Integer userId, Integer productId, Integer count){
+       Cart cart = cartMapper.selectByUserIdAndProductId(userId, productId);
+       if(cart != null){
+           cart.setQuantity(count);
+           cartMapper.updateByPrimaryKeySelective(cart);
+       }
+        return this.list(userId);
+    }
+
+    @Override
+    public ServerResponse<CartVo> deleteProduct(Integer userId, String products){
+        List<String> productList = Splitter.on(',').splitToList(products);
+        cartMapper.deleteByProducts(userId, productList);
+        return this.list(userId);
+    }
+
+    @Override
+    public ServerResponse<CartVo> changeCheck(Integer userId, Integer productId, int checkStatus){
+        cartMapper.changeCheck(userId, productId, checkStatus);
+        return this.list(userId);
+    }
+
+    @Override
+    public ServerResponse<Integer> getCount(Integer userId){
+        return ServerResponse.createBySuccess(cartMapper.getCountByUserId(userId));
+    }
+
 
     @Override
     public ServerResponse<CartVo> list(Integer userId){
@@ -72,6 +102,7 @@ public class CartService implements ICartService {
                 cartProductVo.setUserId(userId);
                 cartProductVo.setProductId(c.getProductId());
                 cartProductVo.setProductChecked(c.getChecked());
+                cartProductVo.setQuantity(c.getQuantity());
                 Product product = productMapper.selectByPrimaryKey(c.getProductId());
                 if(product != null){
                     cartProductVo.setProductName(product.getName());
