@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/product")
 public class ProductController {
@@ -38,5 +41,12 @@ public class ProductController {
                                                   @RequestParam(defaultValue = "10") int pageSize,
                                                   @RequestParam(defaultValue = "") String orderBy){
         return iProductService.getPortalList(categoryId, keyword, pageNum, pageSize, orderBy);
+    }
+
+    @RequestMapping("/back")
+    public Object back(HttpServletRequest request){
+        Map<String, String[]> map =  request.getParameterMap();
+
+        return "1111";
     }
 }
