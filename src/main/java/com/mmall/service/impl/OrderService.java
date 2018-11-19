@@ -136,19 +136,16 @@ public class OrderService implements IOrderService {
 
             case FAILED:
                 log.error("支付宝预下单失败!!!");
-                break;
+                return ServerResponse.createByErrorMessage("支付宝预下单失败!!!");
 
             case UNKNOWN:
                 log.error("系统异常，预下单状态未知!!!");
-                break;
+                return ServerResponse.createByErrorMessage("系统异常，预下单状态未知!!!");
 
             default:
                 log.error("不支持的交易状态，交易返回异常!!!");
-                break;
+                return ServerResponse.createByErrorMessage("不支持的交易状态，交易返回异常!!!");
         }
-
-        //
-        return null;
     }
 
     private void dumpResponse(AlipayResponse response) {
