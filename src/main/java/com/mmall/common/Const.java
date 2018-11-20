@@ -96,4 +96,30 @@ public class Const {
             this.name = name;
         }
     }
+
+    public enum PaymentType{
+        ONLINE(1, "在线支付");
+        private int code;
+        private String name;
+        PaymentType(int code, String name){
+            this.code = code;
+            this.name = name;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(int code) {
+            this.code = code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 }

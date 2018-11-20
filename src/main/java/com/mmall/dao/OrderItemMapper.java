@@ -18,4 +18,6 @@ public interface OrderItemMapper {
     int updateByPrimaryKey(OrderItem record);
 
     List<OrderItem> getListByOrderNo(Long orderNo);
+
+    int inserts(List<OrderItem> orderItemList);
 }

@@ -1,6 +1,8 @@
 package com.mmall.service.impl;
 
+import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayResponse;
+import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.response.AlipayTradePrecreateResponse;
 import com.alipay.demo.trade.config.Configs;
 import com.alipay.demo.trade.model.ExtendParams;
@@ -10,17 +12,16 @@ import com.alipay.demo.trade.model.result.AlipayF2FPrecreateResult;
 import com.alipay.demo.trade.service.AlipayTradeService;
 import com.alipay.demo.trade.service.impl.AlipayTradeServiceImpl;
 import com.alipay.demo.trade.utils.ZxingUtils;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mmall.common.Const;
 import com.mmall.common.ServerResponse;
-import com.mmall.dao.OrderItemMapper;
-import com.mmall.dao.OrderMapper;
-import com.mmall.dao.PayInfoMapper;
-import com.mmall.pojo.Order;
-import com.mmall.pojo.OrderItem;
-import com.mmall.pojo.PayInfo;
+import com.mmall.dao.*;
+import com.mmall.pojo.*;
 import com.mmall.service.IOrderService;
 import com.mmall.util.BigDecimalUtil;
+import com.mmall.util.DateFormatUtil;
+import net.sf.jsqlparser.schema.Server;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,76 @@ public class OrderService implements IOrderService {
 
     @Autowired
     PayInfoMapper payInfoMapper;
+
+    @Autowired
+    CartMapper cartMapper;
+
+    @Autowired
+    ProductMapper productMapper;
+
+    public ServerResponse createOrder(Integer userId, Integer shippingId) {
+        List<Cart> cartList = cartMapper.selectCheckedCarByUserId(userId);
+        List<OrderItem> orderItemList = Lists.newArrayList();
+        Long orderNo = System.currentTimeMillis() + System.currentTimeMillis() % 10;
+        BigDecimal payment = BigDecimal.ZERO;
+        for (Cart cart : cartList) {
+            Product product = productMapper.selectByPrimaryKey(cart.getProductId());
+            if (product == null) {
+                return ServerResponse.createByErrorMessage("商品不存在");
+            }
+            if (product.getStatus() != Const.ProductStatus.SELLING) {
+                return ServerResponse.createByErrorMessage(String.format("商品%s已下架", product.getName()));
+            }
+            if (product.getStock() < cart.getQuantity()) {
+                return ServerResponse.createByErrorMessage(String.format("商品%s库存不足", product.getName()));
+            }
+            // 每个订单item 总价格
+            BigDecimal totalPrice = BigDecimalUtil.mul(product.getPrice().doubleValue(), cart.getQuantity());
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrderNo(orderNo);
+            orderItem.setCurrentUnitPrice(product.getPrice());
+            orderItem.setProductId(product.getId());
+            orderItem.setProductImage(product.getMainImage());
+            orderItem.setProductName(product.getName());
+            orderItem.setQuantity(cart.getQuantity());
+            orderItem.setTotalPrice(totalPrice);
+            orderItem.setUserId(userId);
+
+            orderItemList.add(orderItem);
+
+            // 订单总 价格
+            payment = BigDecimalUtil.add(payment.doubleValue(), totalPrice.doubleValue());
+        }
+        Order order = new Order();
+        order.setOrderNo(orderNo);
+        order.setPayment(payment);
+        order.setStatus(Const.OrderStatus.NOT_PAYING.getCode());
+        order.setPaymentType(Const.PaymentType.ONLINE.getCode());
+        order.setPostage(10);
+        order.setShippingId(shippingId);
+        order.setUserId(userId);
+
+        // todo
+        orderMapper.insertSelective(order);
+
+        //todo
+        orderItemMapper.inserts(orderItemList);
+
+        return null;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Override
     public ServerResponse pay(Integer userId, Long orderNo, String path){
@@ -167,60 +238,98 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public ServerResponse alipayCallback(Map<String, String> params) {
+    public ServerResponse alipayCallback(Map<String, String[]> requestParams) {
+        // 重新组装参数Map
+        Map<String , String> params = Maps.newHashMap();
+        for(String key : requestParams.keySet()) {
+            String value = "";
+            String[] values = requestParams.get(key);
+            for (int i = 0; i < values.length; i++) {
+                value = (i == values.length - 1) ? value + values[i] : value + values[i] + ",";
+            }
+            params.put(key, value);
+        }
+        log.info("sign：{}。trade_status：{}。支付宝回掉的参数集合：{}。", params.get("sign"), params.get("trade_status"), params);
+
+//        params.remove("sign_type");
+
+        try {
+            if (!AlipaySignature.rsaCheckV2(params, Configs.getAlipayPublicKey(), "utf-8", Configs.getSignType())) {
+                log.error("支付宝回调验证签名失败");
+                return ServerResponse.createByErrorMessage("非法请求，请勿再请求，否则报警");
+            }
+        } catch (AlipayApiException e) {
+            log.error("支付宝验证签名异常：{}", e);
+            return ServerResponse.createByErrorMessage("支付宝签名验证异常");
+        }
+
         String orderNo = params.get("out_trade_no");
         String trade_status = params.get("trade_status");
         String total_amount = params.get("total_amount");
         String appId = params.get("app_id");
+        String paymentTime = params.get("gmt_payment");
+        String trade_no = params.get("trade_no");
 
+        // 查询平台是否存在订单
         Order order = orderMapper.selectByOrderNo(Long.valueOf(orderNo));
-
-        // 与平台订单进行核对，防止错误回调
         if(order == null) {
-            log.error("非平台单号");
-            return ServerResponse.createByError();
+            log.error("平台不存在订单：{}", orderNo);
+            return ServerResponse.createByErrorMessage("支付宝签名验证异常");
         }
 
+        // 核查商户id
         if(!Configs.getAppid().toString().equals(appId)) {
-            log.error("商户appid不正确");
-            return ServerResponse.createByError();
+            log.error("商户appid不正确{}", appId);
+            return ServerResponse.createByErrorMessage("商户appId不正确");
         }
 
-//        BigDecimal payment = BigDecimalUtil.mul(order.getPayment().doubleValue(), 100d);
+        //核查订单总价
+        BigDecimal payment = new BigDecimal(total_amount);
+        if (payment.compareTo(order.getPayment()) != 0) {
+            log.error("与平台订单总价不符,平台订单总价{},回调参数{}",order.getPayment().toString(), payment.toString());
+            return ServerResponse.createByErrorMessage("与平台订单总价不符");
+        }
 
-//        if (payment.doubleValue() != Double.valueOf(total_amount)) {
-//            log.error("与平台订单信息不符");
-//            return ServerResponse.createByErrorMessage("与平台订单信息不符");
-//        }
-        if (order.getStatus() != Const.OrderStatus.NOT_PAYING.getCode()) {
-            log.error("订单状态不正确");
-            return ServerResponse.createByError();
+        // 如果订单是已付款状态，直接返回success。
+        // 如果是取消状态也要进行订单状态更新为已付款。
+        if (order.getStatus() > Const.OrderStatus.NOT_PAYING.getCode()) {
+            return ServerResponse.createBySuccess();
         }
 
         if (StringUtils.equals(trade_status, "TRADE_SUCCESS") || StringUtils.equals(trade_status, "TRADE_FINISHED")) {
-            // 更新订单状态为已支付
+            // 更新订单状态为已支付(包括取消的订单在此时收到了支付成功，也要更新支付状态)
             order.setStatus(Const.OrderStatus.PAYED.getCode());
+            order.setPaymentTime(DateFormatUtil.strToDate(paymentTime));
             int result = orderMapper.updateByPrimaryKeySelective(order);
             if (result <= 0) {
-                log.error("订单状态更新失败，订单号：{}", orderNo);
-//            return ServerResponse.createByErrorMessage("订单状态更新失败" + orderNo);
+                log.error("订单状态更新失败，订单号：{}，支付状态：{}，支付时间：{}，支付平台：{}",
+                        orderNo, trade_status, paymentTime, Const.PayPlatform.ALIPAY.getName());  // 运维时通过日志补失败的更新。
             }
         }
-
-
         // 插入交易记录
         PayInfo payInfo = new PayInfo();
         payInfo.setOrderNo(Long.valueOf(orderNo));
         payInfo.setPlatformStatus(trade_status);
-        payInfo.setPlatformNumber(params.get("trade_no"));
+        payInfo.setPlatformNumber(trade_no);
         payInfo.setUserId(order.getUserId());
         payInfo.setPayPlatform(Const.PayPlatform.ALIPAY.getCode());
         int insertResult = payInfoMapper.insertSelective(payInfo);
         if (insertResult == 0){
-            log.error("交易记录插入失败。订单号：{},用户id：{},付款状态：{},支付宝订单号",orderNo, order.getUserId(), trade_status, params.get("trade_no"));
+            log.error("交易记录插入失败。订单号：{},用户id：{},支付状态：{},支付宝订单号",
+                    orderNo, order.getUserId(), trade_status, trade_no); // 运维时通过日志补失败的更新。
         }
-
-
         return ServerResponse.createBySuccess();
+    }
+
+    @Override
+    public ServerResponse<Boolean> queryOrderPayStatus(Long orderNo, Integer userId){
+        Order order = orderMapper.selectByUserIdAndOrderNo(userId, orderNo);
+        if (order == null) {
+            return ServerResponse.createByErrorMessage("该用户不存在此订单");
+        }
+        if (order.getStatus() > Const.OrderStatus.NOT_PAYING.getCode()) {
+            return ServerResponse.createBySuccess(true);
+        }
+        return ServerResponse.createBySuccess(false);
     }
 }
