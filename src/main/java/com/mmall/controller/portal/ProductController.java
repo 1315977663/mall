@@ -46,7 +46,6 @@ public class ProductController {
     @RequestMapping("/back")
     public Object back(HttpServletRequest request){
         Map<String, String[]> map =  request.getParameterMap();
-
         return "1111";
     }
 }
