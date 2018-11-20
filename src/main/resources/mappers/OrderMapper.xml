@@ -84,12 +84,8 @@
       <if test="closeTime != null">
         close_time,
       </if>
-      <if test="createTime != null">
         create_time,
-      </if>
-      <if test="updateTime != null">
-        update_time,
-      </if>
+        update_time
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -211,6 +207,13 @@
     from mmall_order
     where order_no = #{orderNo,jdbcType=BIGINT}
     and user_id = #{userId,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select 
+    <include refid="Base_Column_List"/>
+    from mmall_order
+    where order_no = #{orderNo, jdbcType=BIGINT}
   </select>
 
 </mapper>

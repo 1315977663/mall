@@ -38,4 +38,62 @@ public class Const {
         String LIMIT_NUM_FAIL = "LIMIT_NUM_FAIL";
     }
 
+    public enum OrderStatus{
+        CANCELLED(0, "已取消"),
+        NOT_PAYING(10, "未付款"),
+        PAYED(20, "已付款"),
+        SHIPPED(40, "已发货"),
+        SUCCESS(50, "交易成功"),
+        CLOSE(60,"交易关闭")
+        ;
+        OrderStatus(int code, String msg) {
+            this.code = code;
+            this.msg =msg;
+        }
+        private int code;
+        private String msg;
+
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(int code) {
+            this.code = code;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
+
+        public void setMsg(String msg) {
+            this.msg = msg;
+        }
+    }
+
+    public enum PayPlatform{
+        ALIPAY(1, "支付宝"),
+        WECHAT(2, "微信");
+        private int code;
+        private String name;
+        PayPlatform(int code, String name){
+            this.code = code;
+            this.name = name;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(int code) {
+            this.code = code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 }

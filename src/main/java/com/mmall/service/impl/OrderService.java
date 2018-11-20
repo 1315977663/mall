@@ -11,11 +11,14 @@ import com.alipay.demo.trade.service.AlipayTradeService;
 import com.alipay.demo.trade.service.impl.AlipayTradeServiceImpl;
 import com.alipay.demo.trade.utils.ZxingUtils;
 import com.google.common.collect.Maps;
+import com.mmall.common.Const;
 import com.mmall.common.ServerResponse;
 import com.mmall.dao.OrderItemMapper;
 import com.mmall.dao.OrderMapper;
+import com.mmall.dao.PayInfoMapper;
 import com.mmall.pojo.Order;
 import com.mmall.pojo.OrderItem;
+import com.mmall.pojo.PayInfo;
 import com.mmall.service.IOrderService;
 import com.mmall.util.BigDecimalUtil;
 import org.apache.commons.lang.StringUtils;
@@ -25,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +43,9 @@ public class OrderService implements IOrderService {
 
     @Autowired
     OrderItemMapper orderItemMapper;
+
+    @Autowired
+    PayInfoMapper payInfoMapper;
 
     @Override
     public ServerResponse pay(Integer userId, Long orderNo, String path){
@@ -109,7 +116,7 @@ public class OrderService implements IOrderService {
                 .setUndiscountableAmount(undiscountableAmount).setSellerId(sellerId).setBody(body)
                 .setOperatorId(operatorId).setStoreId(storeId).setExtendParams(extendParams)
                 .setTimeoutExpress(timeoutExpress)
-                .setNotifyUrl("http://izyfbe.natappfree.cc/product/back.do")//支付宝服务器主动通知商户服务器里指定的页面http路径,根据需要设置
+                .setNotifyUrl("http://gzay7c.natappfree.cc/order/alpay_callback.do")//支付宝服务器主动通知商户服务器里指定的页面http路径,根据需要设置
                 .setGoodsDetailList(goodsDetailList);
 
         AlipayF2FPrecreateResult result = tradeService.tradePrecreate(builder);
@@ -157,5 +164,63 @@ public class OrderService implements IOrderService {
             }
             log.info("body:" + response.getBody());
         }
+    }
+
+    @Override
+    public ServerResponse alipayCallback(Map<String, String> params) {
+        String orderNo = params.get("out_trade_no");
+        String trade_status = params.get("trade_status");
+        String total_amount = params.get("total_amount");
+        String appId = params.get("app_id");
+
+        Order order = orderMapper.selectByOrderNo(Long.valueOf(orderNo));
+
+        // 与平台订单进行核对，防止错误回调
+        if(order == null) {
+            log.error("非平台单号");
+            return ServerResponse.createByError();
+        }
+
+        if(!Configs.getAppid().toString().equals(appId)) {
+            log.error("商户appid不正确");
+            return ServerResponse.createByError();
+        }
+
+//        BigDecimal payment = BigDecimalUtil.mul(order.getPayment().doubleValue(), 100d);
+
+//        if (payment.doubleValue() != Double.valueOf(total_amount)) {
+//            log.error("与平台订单信息不符");
+//            return ServerResponse.createByErrorMessage("与平台订单信息不符");
+//        }
+        if (order.getStatus() != Const.OrderStatus.NOT_PAYING.getCode()) {
+            log.error("订单状态不正确");
+            return ServerResponse.createByError();
+        }
+
+        if (StringUtils.equals(trade_status, "TRADE_SUCCESS") || StringUtils.equals(trade_status, "TRADE_FINISHED")) {
+            // 更新订单状态为已支付
+            order.setStatus(Const.OrderStatus.PAYED.getCode());
+            int result = orderMapper.updateByPrimaryKeySelective(order);
+            if (result <= 0) {
+                log.error("订单状态更新失败，订单号：{}", orderNo);
+//            return ServerResponse.createByErrorMessage("订单状态更新失败" + orderNo);
+            }
+        }
+
+
+        // 插入交易记录
+        PayInfo payInfo = new PayInfo();
+        payInfo.setOrderNo(Long.valueOf(orderNo));
+        payInfo.setPlatformStatus(trade_status);
+        payInfo.setPlatformNumber(params.get("trade_no"));
+        payInfo.setUserId(order.getUserId());
+        payInfo.setPayPlatform(Const.PayPlatform.ALIPAY.getCode());
+        int insertResult = payInfoMapper.insertSelective(payInfo);
+        if (insertResult == 0){
+            log.error("交易记录插入失败。订单号：{},用户id：{},付款状态：{},支付宝订单号",orderNo, order.getUserId(), trade_status, params.get("trade_no"));
+        }
+
+
+        return ServerResponse.createBySuccess();
     }
 }
