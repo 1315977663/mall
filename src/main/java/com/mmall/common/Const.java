@@ -53,6 +53,15 @@ public class Const {
         private int code;
         private String msg;
 
+        public static String getMsg(int code) {
+            for (OrderStatus orderStatus : values()) {
+                if (orderStatus.getCode() == code) {
+                    return orderStatus.getMsg();
+                }
+            }
+            return "无对应枚举";
+        }
+
         public int getCode() {
             return code;
         }
@@ -120,6 +129,18 @@ public class Const {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public static String getName(int code) {
+
+            for (PaymentType paymentType : values()) {
+                if (paymentType.getCode() == code) {
+                    return paymentType.getName();
+                }
+            }
+
+            return "无对应枚举";
+
         }
     }
 }

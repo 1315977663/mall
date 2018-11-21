@@ -20,4 +20,7 @@ public interface OrderItemMapper {
     List<OrderItem> getListByOrderNo(Long orderNo);
 
     int inserts(List<OrderItem> orderItemList);
+
+    List<OrderItem> selectByUserId(Integer userId);
+
 }
