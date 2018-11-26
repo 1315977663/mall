@@ -424,13 +424,13 @@ public class OrderService implements IOrderService {
     public ServerResponse alipayCallback(Map<String, String[]> requestParams) {
         // 重新组装参数Map
         Map<String , String> params = Maps.newHashMap();
-        for(String key : requestParams.keySet()) {
+        for(Map.Entry<String, String[]> entry : requestParams.entrySet()) {
             String value = "";
-            String[] values = requestParams.get(key);
+            String[] values = entry.getValue();
             for (int i = 0; i < values.length; i++) {
                 value = (i == values.length - 1) ? value + values[i] : value + values[i] + ",";
             }
-            params.put(key, value);
+            params.put(entry.getKey(), value);
         }
         log.info("sign：{}。trade_status：{}。支付宝回掉的参数集合：{}。", params.get("sign"), params.get("trade_status"), params);
 
