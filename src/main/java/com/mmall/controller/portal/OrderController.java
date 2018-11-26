@@ -1,10 +1,5 @@
 package com.mmall.controller.portal;
 
-import com.alipay.api.AlipayApiException;
-import com.alipay.api.domain.Car;
-import com.alipay.api.internal.util.AlipaySignature;
-import com.alipay.demo.trade.config.Configs;
-import com.google.common.collect.Maps;
 import com.mmall.common.Const;
 import com.mmall.common.PageBean;
 import com.mmall.common.Role;
@@ -20,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+<<<<<<< HEAD
 
+=======
+>>>>>>> de8f739e80ae91ea9e08338a2374604694c3a898
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.List;
 import java.util.Map;
 
 @RestController
