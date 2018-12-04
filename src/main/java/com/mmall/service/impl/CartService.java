@@ -1,5 +1,9 @@
 package com.mmall.service.impl;
 
+import com.alipay.api.domain.Car;
+import com.dyuproject.protostuff.LinkedBuffer;
+import com.dyuproject.protostuff.ProtobufIOUtil;
+import com.dyuproject.protostuff.runtime.RuntimeSchema;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.mmall.common.Const;
@@ -35,8 +39,11 @@ public class CartService implements ICartService {
     @Autowired
     ProductMapper productMapper;
 
+    private RuntimeSchema<Cart> runtimeSchema = RuntimeSchema.createFrom(Cart.class);
+
     @Override
     public ServerResponse<CartVo> add(Integer userId, Integer productId, Integer count){
+
 
         Cart cart = cartMapper.selectByUserIdAndProductId(userId, productId);
 

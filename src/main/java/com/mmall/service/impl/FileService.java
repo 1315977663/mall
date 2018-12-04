@@ -27,6 +27,8 @@ public class FileService implements IFileService {
     @Override
     public ServerResponse<String> upload(MultipartFile file, String path){
 
+
+
         // 文件原始名称
         String originalFilename = file.getOriginalFilename();
 
@@ -36,10 +38,11 @@ public class FileService implements IFileService {
         // 上传的文件名
         String fileUploadName = UUID.randomUUID().toString() + fileExtensionName;
 
-        logger.info("文件开始上传。上传文件名：{},上传路径：{},上传后新文件名{}", originalFilename, path, fileUploadName);
+        String ROOT_PATH = "/resources/";
+        logger.info("文件开始上传。上传文件名：{},上传路径：{},上传后新文件名{}", originalFilename, ROOT_PATH +path, fileUploadName);
 
 
-        File fileDir = new File(path);
+        File fileDir = new File(ROOT_PATH +path);
         if(!fileDir.exists()){
             fileDir.setWritable(true); // 允许写的权限
             if (fileDir.mkdirs()){
@@ -50,27 +53,28 @@ public class FileService implements IFileService {
             }
         }
 
-        File targetFile = new File(path, fileUploadName);
+        File targetFile = new File(ROOT_PATH +path, fileUploadName);
 
         try {
             file.transferTo(targetFile);
             // 文件已经传输到了服务器上
 
-            boolean ftpSuccess = FTPUtil.uploadFile(Lists.newArrayList(targetFile));
-            //todo 传到ftp服务上
-
-            targetFile.delete();
-
-            if(ftpSuccess){
-                return ServerResponse.createBySuccess(targetFile.getName(), "文件上传成功");
-            } else {
-                return ServerResponse.createByErrorMessage("文件上传失败");
-            }
-            //删除服务器上文件
+//            boolean ftpSuccess = FTPUtil.uploadFile(Lists.newArrayList(targetFile));
+//            //todo 传到ftp服务上
+//
+//            targetFile.delete();
+//
+//            if(ftpSuccess){
+//                return ServerResponse.createBySuccess(targetFile.getName(), "文件上传成功");
+//            } else {
+//                return ServerResponse.createByErrorMessage("文件上传失败");
+//            }
+//            //删除服务器上文件
         } catch (IOException e) {
             logger.error("文件上传失败", e.getMessage());
             return ServerResponse.createByErrorMessage("文件上传失败");
         }
+        return ServerResponse.createBySuccess("/"+ path  + "/" + targetFile.getName(), "文件上传成功");
     }
 
 }
